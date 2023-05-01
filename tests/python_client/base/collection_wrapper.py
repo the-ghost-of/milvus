@@ -31,7 +31,7 @@ class ApiCollectionWrapper:
                         active_trace=False, **kwargs):
         self.active_trace = active_trace
         consistency_level = kwargs.get("consistency_level", CONSISTENCY_STRONG)
-        kwargs.update({"consistency_level": consistency_level})
+        kwargs["consistency_level"] = consistency_level
 
         """ In order to distinguish the same name of collection """
         func_name = sys._getframe().f_code.co_name
@@ -91,7 +91,7 @@ class ApiCollectionWrapper:
     @trace()
     def drop(self, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.drop], **kwargs)
@@ -112,7 +112,7 @@ class ApiCollectionWrapper:
     @trace()
     def release(self, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.release], **kwargs)
@@ -123,7 +123,7 @@ class ApiCollectionWrapper:
     @trace()
     def insert(self, data, partition_name=None, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.insert, data, partition_name], **kwargs)
@@ -152,7 +152,7 @@ class ApiCollectionWrapper:
     @trace()
     def flush(self, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.flush], **kwargs)
@@ -213,7 +213,7 @@ class ApiCollectionWrapper:
     @trace()
     def drop_partition(self, partition_name, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.drop_partition, partition_name], **kwargs)
@@ -246,7 +246,7 @@ class ApiCollectionWrapper:
         timeout = kwargs.get("timeout", disktimeout * 2)
         index_name = INDEX_NAME if index_name is None else index_name
         index_name = kwargs.get("index_name", index_name)
-        kwargs.update({"timeout": timeout, "index_name": index_name})
+        kwargs |= {"timeout": timeout, "index_name": index_name}
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.create_index, field_name, index_params], **kwargs)
         check_result = ResponseChecker(res, func_name, check_task, check_items, check,
@@ -257,7 +257,7 @@ class ApiCollectionWrapper:
     def has_index(self, index_name=None, check_task=None, check_items=None, **kwargs):
         index_name = INDEX_NAME if index_name is None else index_name
         index_name = kwargs.get("index_name", index_name)
-        kwargs.update({"index_name": index_name})
+        kwargs["index_name"] = index_name
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.has_index], **kwargs)
@@ -269,7 +269,7 @@ class ApiCollectionWrapper:
         timeout = kwargs.get("timeout", TIMEOUT)
         index_name = INDEX_NAME if index_name is None else index_name
         index_name = kwargs.get("index_name", index_name)
-        kwargs.update({"timeout": timeout, "index_name": index_name})
+        kwargs |= {"timeout": timeout, "index_name": index_name}
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.drop_index], **kwargs)
@@ -279,7 +279,7 @@ class ApiCollectionWrapper:
     @trace()
     def create_alias(self, alias_name, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.create_alias, alias_name], **kwargs)
@@ -289,7 +289,7 @@ class ApiCollectionWrapper:
     @trace()
     def drop_alias(self, alias_name, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.drop_alias, alias_name], **kwargs)
@@ -299,7 +299,7 @@ class ApiCollectionWrapper:
     @trace()
     def alter_alias(self, alias_name, check_task=None, check_items=None, **kwargs):
         timeout = kwargs.get("timeout", TIMEOUT)
-        kwargs.update({"timeout": timeout})
+        kwargs["timeout"] = timeout
 
         func_name = sys._getframe().f_code.co_name
         res, check = api_request([self.collection.alter_alias, alias_name], **kwargs)
@@ -346,9 +346,7 @@ class ApiCollectionWrapper:
 
     def wait_for_compaction_completed(self, timeout=None, **kwargs):
         timeout = TIMEOUT * 3 if timeout is None else timeout
-        res = self.collection.wait_for_compaction_completed(timeout, **kwargs)
-        # log.debug(res)
-        return res
+        return self.collection.wait_for_compaction_completed(timeout, **kwargs)
 
     def get_replicas(self, timeout=None, check_task=None, check_items=None, **kwargs):
         timeout = TIMEOUT if timeout is None else timeout

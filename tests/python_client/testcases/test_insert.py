@@ -139,7 +139,10 @@ class TestInsertParams(TestcaseBase):
         collection_w = self.init_collection_wrap(name=c_name)
         df = cf.gen_default_dataframe_data(10)
         df.rename(columns={ct.default_int64_field_name: get_invalid_field_name}, inplace=True)
-        error = {ct.err_code: 1, ct.err_msg: "The name of field don't match, expected: int64, got %s" % get_invalid_field_name}
+        error = {
+            ct.err_code: 1,
+            ct.err_msg: f"The name of field don't match, expected: int64, got {get_invalid_field_name}",
+        }
         collection_w.insert(data=df, check_task=CheckTasks.err_res, check_items=error)
 
     def test_insert_dataframe_index(self):
@@ -292,7 +295,7 @@ class TestInsertParams(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 10
-        int_values = [i for i in range(nb - 1)]
+        int_values = list(range(nb - 1))
         float_values = [np.float32(i) for i in range(nb)]
         float_vec_values = cf.gen_vectors(nb, ct.default_dim)
         data = [int_values, float_values, float_vec_values]
@@ -309,7 +312,7 @@ class TestInsertParams(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 10
-        int_values = [i for i in range(nb)]
+        int_values = list(range(nb))
         float_values = [np.float32(i) for i in range(nb)]
         float_vec_values = cf.gen_vectors(nb - 1, ct.default_dim)
         data = [int_values, float_values, float_vec_values]
@@ -326,7 +329,7 @@ class TestInsertParams(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         df = cf.gen_default_dataframe_data(ct.default_nb)
-        new_values = [i for i in range(ct.default_nb)]
+        new_values = list(range(ct.default_nb))
         df.insert(3, 'new', new_values)
         error = {ct.err_code: 1, ct.err_msg: "The fields don't match with schema fields, "
                                              "expected: ['int64', 'float', 'varchar', 'float_vector'], "
@@ -359,7 +362,7 @@ class TestInsertParams(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 10
-        int_values = [i for i in range(nb)]
+        int_values = list(range(nb))
         float_values = [np.float32(i) for i in range(nb)]
         float_vec_values = cf.gen_vectors(nb, ct.default_dim)
         data = [float_values, int_values, float_vec_values]
@@ -376,7 +379,7 @@ class TestInsertParams(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 10
-        int_values = pd.Series(data=[i for i in range(nb)])
+        int_values = pd.Series(data=list(range(nb)))
         float_values = pd.Series(data=[float(i) for i in range(nb)], dtype="float32")
         float_vec_values = cf.gen_vectors(nb, ct.default_dim)
         df = pd.DataFrame({
@@ -745,7 +748,7 @@ class TestInsertOperation(TestcaseBase):
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 100
         data = cf.gen_default_list_data(nb=nb)
-        data[0] = [1 for i in range(nb)]
+        data[0] = [1 for _ in range(nb)]
         mutation_res, _ = collection_w.insert(data)
         assert mutation_res.insert_count == nb
         assert mutation_res.primary_keys == data[0]
@@ -761,7 +764,7 @@ class TestInsertOperation(TestcaseBase):
         collection_w = self.init_collection_wrap(name=c_name)
         nb = 100
         data = cf.gen_default_list_data(nb)
-        data[0] = [i for i in range(0, -nb, -1)]
+        data[0] = list(range(0, -nb, -1))
         mutation_res, _ = collection_w.insert(data)
         assert mutation_res.primary_keys == data[0]
         assert collection_w.num_entities == nb
@@ -1007,7 +1010,7 @@ class TestInsertBinary(TestcaseBase):
         collection_w = self.init_collection_wrap(name=c_name, schema=default_binary_schema)
         df, _ = cf.gen_default_binary_dataframe_data(ct.default_nb)
         nums = 2
-        for i in range(nums):
+        for _ in range(nums):
             mutation_res, _ = collection_w.insert(data=df)
         assert collection_w.num_entities == ct.default_nb * nums
 
@@ -1375,8 +1378,12 @@ class TestUpsertValid(TestcaseBase):
         c_name = cf.gen_unique_str(pre_upsert)
         collection_w = self.init_collection_general(c_name, True, is_binary=True)[0]
         binary_vectors = cf.gen_binary_vectors(nb, ct.default_dim)[1]
-        data = [[i for i in range(nb)], [np.float32(i) for i in range(nb)],
-                [str(i) for i in range(nb)], binary_vectors]
+        data = [
+            list(range(nb)),
+            [np.float32(i) for i in range(nb)],
+            [str(i) for i in range(nb)],
+            binary_vectors,
+        ]
         collection_w.upsert(data)
         res = collection_w.query("int64 >= 0", [ct.default_binary_vec_field_name])[0]
         assert binary_vectors[0] == res[0][ct. default_binary_vec_field_name]
@@ -1520,7 +1527,7 @@ class TestUpsertValid(TestcaseBase):
         exp = f"int64 >= 0 && int64 <= {upsert_nb}"
         res = collection_w.query(exp, [default_float_name], consistency_level="Strong")[0]
         res = [res[i][default_float_name] for i in range(upsert_nb)]
-        if not (res == float_values1.to_list() or res == float_values2.to_list()):
+        if res not in [float_values1.to_list(), float_values2.to_list()]:
             assert False
 
     @pytest.mark.tags(CaseLabel.L1)

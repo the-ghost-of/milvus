@@ -49,7 +49,9 @@ class TestQueryParams(TestcaseBase):
         method: query with invalid term expr
         expected: raise exception
         """
-        collection_w, entities = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, entities = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         term_expr = f'{default_int_field_name} in {entities[:default_pos]}'
         error = {ct.err_code: 1, ct.err_msg: "unexpected token Identifier"}
         collection_w.query(term_expr, check_task=CheckTasks.err_res, check_items=error)
@@ -62,7 +64,9 @@ class TestQueryParams(TestcaseBase):
         expected: verify query result
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 5
         term_expr = f'{ct.default_int64_field_name} in {int_values[:pos]}'
@@ -81,7 +85,7 @@ class TestQueryParams(TestcaseBase):
         # 1. initialize without data
         collection_w = self.init_collection_general(prefix)[0]
         # 2. Drop collection
-        log.info("test_query_no_collection: drop collection %s" % collection_w.name)
+        log.info(f"test_query_no_collection: drop collection {collection_w.name}")
         collection_w.drop()
         # 3. Search without collection
         log.info("test_query_no_collection: query without collection ")
@@ -147,9 +151,11 @@ class TestQueryParams(TestcaseBase):
         expected: query results are de-duplicated
         """
         nb = ct.default_nb
-        collection_w, insert_data, _, _ = self.init_collection_general(prefix, True, nb, dim=dim)[0:4]
+        collection_w, insert_data, _, _ = self.init_collection_general(
+            prefix, True, nb, dim=dim
+        )[:4]
         # insert dup data multi times
-        for i in range(dup_times):
+        for _ in range(dup_times):
             collection_w.insert(insert_data[0])
         # query
         res, _ = collection_w.query(default_term_expr)
@@ -184,7 +190,9 @@ class TestQueryParams(TestcaseBase):
         method: query with expr None
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         error = {ct.err_code: 0, ct.err_msg: "The type of expr must be string"}
         collection_w.query(None, check_task=CheckTasks.err_res, check_items=error)
 
@@ -195,7 +203,9 @@ class TestQueryParams(TestcaseBase):
         method: query with non-string expr, eg 1, [] ..
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         exprs = [1, 2., [], {}, ()]
         error = {ct.err_code: 0, ct.err_msg: "The type of expr must be string"}
         for expr in exprs:
@@ -208,7 +218,9 @@ class TestQueryParams(TestcaseBase):
         method: query with invalid string expr
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         error = {ct.err_code: 1, ct.err_msg: "Invalid expression!"}
         exprs = ["12-s", "中文", "a", " "]
         for expr in exprs:
@@ -222,7 +234,9 @@ class TestQueryParams(TestcaseBase):
         method: query with TermExpr
         expected: query result is correct
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res = vectors[0].iloc[:2, :1].to_dict('records')
         collection_w.query(default_term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: res})
 
@@ -247,15 +261,33 @@ class TestQueryParams(TestcaseBase):
         """
         self._connect()
         # construct dataframe and inert data
-        df = pd.DataFrame({
-            ct.default_int64_field_name: pd.Series(data=[i for i in range(ct.default_nb)]),
-            ct.default_int32_field_name: pd.Series(data=[np.int32(i) for i in range(ct.default_nb)], dtype="int32"),
-            ct.default_int16_field_name: pd.Series(data=[np.int16(i) for i in range(ct.default_nb)], dtype="int16"),
-            ct.default_float_field_name: pd.Series(data=[np.float32(i) for i in range(ct.default_nb)], dtype="float32"),
-            ct.default_double_field_name: pd.Series(data=[np.double(i) for i in range(ct.default_nb)], dtype="double"),
-            ct.default_string_field_name: pd.Series(data=[str(i) for i in range(ct.default_nb)], dtype="string"),
-            ct.default_float_vec_field_name: cf.gen_vectors(ct.default_nb, ct.default_dim)
-        })
+        df = pd.DataFrame(
+            {
+                ct.default_int64_field_name: pd.Series(
+                    data=list(range(ct.default_nb))
+                ),
+                ct.default_int32_field_name: pd.Series(
+                    data=[np.int32(i) for i in range(ct.default_nb)], dtype="int32"
+                ),
+                ct.default_int16_field_name: pd.Series(
+                    data=[np.int16(i) for i in range(ct.default_nb)], dtype="int16"
+                ),
+                ct.default_float_field_name: pd.Series(
+                    data=[np.float32(i) for i in range(ct.default_nb)],
+                    dtype="float32",
+                ),
+                ct.default_double_field_name: pd.Series(
+                    data=[np.double(i) for i in range(ct.default_nb)],
+                    dtype="double",
+                ),
+                ct.default_string_field_name: pd.Series(
+                    data=[str(i) for i in range(ct.default_nb)], dtype="string"
+                ),
+                ct.default_float_vec_field_name: cf.gen_vectors(
+                    ct.default_nb, ct.default_dim
+                ),
+            }
+        )
         self.collection_wrap.construct_from_dataframe(cf.gen_unique_str(prefix), df,
                                                       primary_field=ct.default_int64_field_name)
         assert self.collection_wrap.num_entities == ct.default_nb
@@ -270,10 +302,8 @@ class TestQueryParams(TestcaseBase):
         res = df.iloc[:2, :-1].to_dict('records')
         for field in non_primary_field:
             filter_values = df[field].tolist()[:2]
-            if field is not ct.default_string_field_name:
-                term_expr = f'{field} in {filter_values}'
-            else:
-                term_expr = f'{field} in {filter_values}'
+            term_expr = f'{field} in {filter_values}'
+            if field is ct.default_string_field_name:
                 term_expr = term_expr.replace("'", "\"")
             self.collection_wrap.query(term_expr, output_fields=["*"],
                                        check_task=CheckTasks.check_query_results, check_items={exp_res: res})
@@ -288,7 +318,9 @@ class TestQueryParams(TestcaseBase):
         """
         self._connect()
         df = cf.gen_default_dataframe_data()
-        bool_values = pd.Series(data=[True if i % 2 == 0 else False for i in range(ct.default_nb)], dtype="bool")
+        bool_values = pd.Series(
+            data=[i % 2 == 0 for i in range(ct.default_nb)], dtype="bool"
+        )
         df.insert(2, ct.default_bool_field_name, bool_values)
         self.collection_wrap.construct_from_dataframe(cf.gen_unique_str(prefix), df,
                                                       primary_field=ct.default_int64_field_name)
@@ -358,7 +390,9 @@ class TestQueryParams(TestcaseBase):
         """
         # 1. initialize with data
         nb = 1000
-        collection_w, _vectors, _, insert_ids = self.init_collection_general(prefix, True, nb)[0:4]
+        collection_w, _vectors, _, insert_ids = self.init_collection_general(
+            prefix, True, nb
+        )[:4]
 
         # filter result with expression in collection
         _vectors = _vectors[0]
@@ -383,9 +417,11 @@ class TestQueryParams(TestcaseBase):
         method: query with wrong keyword term expr
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         expr_1 = f'{ct.default_int64_field_name} inn [1, 2]'
-        error_1 = {ct.err_code: 1, ct.err_msg: f'unexpected token Identifier("inn")'}
+        error_1 = {ct.err_code: 1, ct.err_msg: 'unexpected token Identifier("inn")'}
         collection_w.query(expr_1, check_task=CheckTasks.err_res, check_items=error_1)
 
         expr_3 = f'{ct.default_int64_field_name} in not [1, 2]'
@@ -472,7 +508,7 @@ class TestQueryParams(TestcaseBase):
         self.collection_wrap.create_index(ct.default_float_vec_field_name, index_params=ct.default_flat_index)
         self.collection_wrap.load()
 
-        random_values = [i for i in range(10, 50)]
+        random_values = list(range(10, 50))
         log.debug(f'random values: {random_values}')
         random.shuffle(random_values)
         term_expr = f'{ct.default_int64_field_name} not in {random_values}'
@@ -489,7 +525,9 @@ class TestQueryParams(TestcaseBase):
         exprs = [f'{ct.default_int64_field_name} in 1',
                  f'{ct.default_int64_field_name} in "in"',
                  f'{ct.default_int64_field_name} in (mn)']
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         error = {ct.err_code: 1, ct.err_msg: "right operand of the InExpr must be array"}
         for expr in exprs:
             collection_w.query(expr, check_task=CheckTasks.err_res, check_items=error)
@@ -502,7 +540,9 @@ class TestQueryParams(TestcaseBase):
         expected: empty result
         """
         term_expr = f'{ct.default_int64_field_name} in []'
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res, _ = collection_w.query(term_expr)
         assert len(res) == 0
 
@@ -528,7 +568,9 @@ class TestQueryParams(TestcaseBase):
         method: query with non-constant array expr
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         constants = [[1], (), {}]
         error = {ct.err_code: 1, ct.err_msg: "unsupported leaf node"}
         for constant in constants:
@@ -554,7 +596,9 @@ class TestQueryParams(TestcaseBase):
         method: query with output one field
         expected: return one field
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res, _ = collection_w.query(default_term_expr, output_fields=[ct.default_float_field_name])
         assert set(res[0].keys()) == {ct.default_int64_field_name, ct.default_float_field_name}
 
@@ -566,8 +610,9 @@ class TestQueryParams(TestcaseBase):
         expected: return all fields
         """
         # 1. initialize with data
-        collection_w, df, _, insert_ids = self.init_collection_general(prefix, True, nb=10,
-                                                                       is_all_data_type=True)[0:4]
+        collection_w, df, _, insert_ids = self.init_collection_general(
+            prefix, True, nb=10, is_all_data_type=True
+        )[:4]
         all_fields = [ct.default_int64_field_name, ct.default_int32_field_name, ct.default_int16_field_name,
                       ct.default_int8_field_name, ct.default_bool_field_name, ct.default_float_field_name,
                       ct.default_double_field_name, ct.default_string_field_name, ct.default_float_vec_field_name]
@@ -617,8 +662,7 @@ class TestQueryParams(TestcaseBase):
 
         # query with two vec output_fields
         output_fields = [ct.default_int64_field_name, ct.default_float_vec_field_name]
-        for vec_field in vec_fields:
-            output_fields.append(vec_field.name)
+        output_fields.extend(vec_field.name for vec_field in vec_fields)
         res = df.loc[:1, output_fields].to_dict('records')
         collection_w.create_index(ct.default_float_vec_field_name, index_params=ct.default_flat_index)
         collection_w.load()
@@ -646,8 +690,7 @@ class TestQueryParams(TestcaseBase):
 
         # query with two vec output_fields
         output_fields = [ct.default_int64_field_name, ct.default_float_vec_field_name]
-        for vec_field in vec_fields:
-            output_fields.append(vec_field.name)
+        output_fields.extend(vec_field.name for vec_field in vec_fields)
         res = df.loc[:1, output_fields].to_dict('records')
         collection_w.create_index(ct.default_float_vec_field_name, index_params=ct.default_flat_index)
         collection_w.load()
@@ -667,7 +710,9 @@ class TestQueryParams(TestcaseBase):
         method: specify binary vec field as output field
         expected: return primary field and binary vec field
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_binary=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_binary=True
+        )[:2]
         fields = [[ct.default_binary_vec_field_name], [ct.default_int64_field_name, ct.default_binary_vec_field_name]]
         for output_fields in fields:
             res, _ = collection_w.query(default_term_expr, output_fields=output_fields)
@@ -680,7 +725,9 @@ class TestQueryParams(TestcaseBase):
         method: specify int64 primary field as output field
         expected: return int64 field
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res, _ = collection_w.query(default_term_expr, output_fields=[ct.default_int64_field_name])
         assert res[0].keys() == {ct.default_int64_field_name}
 
@@ -691,7 +738,9 @@ class TestQueryParams(TestcaseBase):
         method: query with not existed output field
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         error = {ct.err_code: 1, ct.err_msg: 'Field int not exist'}
         output_fields = [["int"], [ct.default_int64_field_name, "int"]]
         for fields in output_fields:
@@ -706,7 +755,9 @@ class TestQueryParams(TestcaseBase):
         method: query with invalid field fields
         expected: raise exception
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         output_fields = ["12-s", 1, [1, "2", 3], (1,), {1: 1}]
         error = {ct.err_code: 0, ct.err_msg: f'Invalid query format. \'output_fields\' must be a list'}
         for fields in output_fields:
@@ -722,7 +773,9 @@ class TestQueryParams(TestcaseBase):
         """
         # init collection with fields: int64, float, float_vec, float_vector1
         # collection_w, df = self.init_multi_fields_collection_wrap(cf.gen_unique_str(prefix))
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         df = vectors[0]
 
         # query with wildcard scale(*)
@@ -754,7 +807,9 @@ class TestQueryParams(TestcaseBase):
         expected: verify query result
         """
         # init collection with fields: int64, float, float_vec
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_index=False
+        )[:2]
         df = vectors[0]
 
         # query with output_fields=["*", float_vector)
@@ -855,7 +910,9 @@ class TestQueryParams(TestcaseBase):
         method: query on default partition
         expected: verify query result
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res = vectors[0].iloc[:2, :1].to_dict('records')
         collection_w.query(default_term_expr, partition_names=[ct.default_partition_name],
                            check_task=CheckTasks.check_query_results, check_items={exp_res: res})
@@ -988,7 +1045,9 @@ class TestQueryParams(TestcaseBase):
         expected: query successfully and verify query result
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[offset: pos + offset]}'
@@ -1009,8 +1068,9 @@ class TestQueryParams(TestcaseBase):
         expected: query successfully and verify query result
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True,
-                                                             is_binary=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_binary=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[offset: pos + offset]}'
@@ -1031,7 +1091,9 @@ class TestQueryParams(TestcaseBase):
         """
         # 1. initialize with data
         nb = 1000
-        collection_w, _vectors, _, insert_ids = self.init_collection_general(prefix, True, nb)[0:4]
+        collection_w, _vectors, _, insert_ids = self.init_collection_general(
+            prefix, True, nb
+        )[:4]
 
         # filter result with expression in collection
         _vectors = _vectors[0]
@@ -1095,7 +1157,9 @@ class TestQueryParams(TestcaseBase):
                 compare the result with query without pagination params
         expected: query successfully
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[offset: pos + offset]}'
@@ -1118,7 +1182,9 @@ class TestQueryParams(TestcaseBase):
         expected: return an empty list
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[10: pos + 10]}'
@@ -1134,14 +1200,22 @@ class TestQueryParams(TestcaseBase):
         expected: raise exception
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[10: pos + 10]}'
-        collection_w.query(term_expr, offset=10, limit=limit,
-                           check_task=CheckTasks.err_res,
-                           check_items={ct.err_code: 1,
-                                        ct.err_msg: "limit [%s] is invalid" % limit})
+        collection_w.query(
+            term_expr,
+            offset=10,
+            limit=limit,
+            check_task=CheckTasks.err_res,
+            check_items={
+                ct.err_code: 1,
+                ct.err_msg: f"limit [{limit}] is invalid",
+            },
+        )
 
     @pytest.mark.tags(CaseLabel.L2)
     @pytest.mark.parametrize("limit", [-1, 67890])
@@ -1152,7 +1226,9 @@ class TestQueryParams(TestcaseBase):
         expected: raise exception
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[10: pos + 10]}'
@@ -1171,14 +1247,22 @@ class TestQueryParams(TestcaseBase):
         expected: raise exception
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[10: pos + 10]}'
-        collection_w.query(term_expr, offset=offset, limit=10,
-                           check_task=CheckTasks.err_res,
-                           check_items={ct.err_code: 1,
-                                        ct.err_msg: "offset [%s] is invalid" % offset})
+        collection_w.query(
+            term_expr,
+            offset=offset,
+            limit=10,
+            check_task=CheckTasks.err_res,
+            check_items={
+                ct.err_code: 1,
+                ct.err_msg: f"offset [{offset}] is invalid",
+            },
+        )
 
     @pytest.mark.tags(CaseLabel.L2)
     @pytest.mark.parametrize("offset", [-1, 67890])
@@ -1189,7 +1273,9 @@ class TestQueryParams(TestcaseBase):
         expected: raise exception
         """
         # create collection, insert default_nb, load collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         pos = 10
         term_expr = f'{ct.default_int64_field_name} in {int_values[10: pos + 10]}'
@@ -1285,10 +1371,12 @@ class TestQueryOperation(TestcaseBase):
         """
 
         # init a collection and insert data
-        collection_w, vectors, binary_raw_vectors = self.init_collection_general(prefix, insert_data=True)[0:3]
+        collection_w, vectors, binary_raw_vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:3]
 
         # query the first row of data
-        check_vec = vectors[0].iloc[:, [0]][0:1].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:1].to_dict('records')
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
 
     @pytest.mark.tags(CaseLabel.L1)
@@ -1301,11 +1389,12 @@ class TestQueryOperation(TestcaseBase):
         """
 
         # init a collection and insert data
-        collection_w, vectors, binary_raw_vectors = self.init_collection_general(prefix, insert_data=True,
-                                                                                 is_binary=True)[0:3]
+        collection_w, vectors, binary_raw_vectors = self.init_collection_general(
+            prefix, insert_data=True, is_binary=True
+        )[:3]
 
         # query the first row of data
-        check_vec = vectors[0].iloc[:, [0]][0:1].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:1].to_dict('records')
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
 
     @pytest.mark.tags(CaseLabel.L2)
@@ -1317,12 +1406,14 @@ class TestQueryOperation(TestcaseBase):
         """
 
         # init a collection and insert data
-        collection_w, vectors, binary_raw_vectors = self.init_collection_general(prefix, insert_data=True)[0:3]
+        collection_w, vectors, binary_raw_vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:3]
 
         # data preparation
         int_values = vectors[0][ct.default_int64_field_name].values.tolist()
         term_expr = f'{ct.default_int64_field_name} in {int_values}'
-        check_vec = vectors[0].iloc[:, [0]][0:len(int_values)].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:len(int_values)].to_dict('records')
 
         # query all array value
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
@@ -1350,7 +1441,9 @@ class TestQueryOperation(TestcaseBase):
         method: query with repeated array value
         expected: return hit entities, no repeated
         """
-        collection_w, vectors, binary_raw_vectors = self.init_collection_general(prefix, insert_data=True)[0:3]
+        collection_w, vectors, binary_raw_vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:3]
         int_values = [0, 0, 0, 0]
         term_expr = f'{ct.default_int64_field_name} in {int_values}'
         res, _ = collection_w.query(term_expr)
@@ -1386,8 +1479,9 @@ class TestQueryOperation(TestcaseBase):
                 3. query
         expected: query result is correct
         """
-        collection_w, vectors, binary_raw_vectors = self.init_collection_general(prefix, insert_data=True,
-                                                                                 is_index=False)[0:3]
+        collection_w, vectors, binary_raw_vectors = self.init_collection_general(
+            prefix, insert_data=True, is_index=False
+        )[:3]
 
         default_field_name = ct.default_float_vec_field_name
         collection_w.create_index(default_field_name, default_index_params)
@@ -1396,7 +1490,7 @@ class TestQueryOperation(TestcaseBase):
 
         int_values = [0]
         term_expr = f'{ct.default_int64_field_name} in {int_values}'
-        check_vec = vectors[0].iloc[:, [0]][0:len(int_values)].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:len(int_values)].to_dict('records')
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
 
     @pytest.mark.tags(CaseLabel.L1)
@@ -1410,8 +1504,12 @@ class TestQueryOperation(TestcaseBase):
 
         limit = 1000
         nb_old = 500
-        collection_w, vectors, binary_raw_vectors, insert_ids = \
-            self.init_collection_general(prefix, True, nb_old)[0:4]
+        (
+            collection_w,
+            vectors,
+            binary_raw_vectors,
+            insert_ids,
+        ) = self.init_collection_general(prefix, True, nb_old)[:4]
 
         # 2. search for original data after load
         vectors_s = [[random.random() for _ in range(ct.default_dim)] for _ in range(ct.default_nq)]
@@ -1424,7 +1522,7 @@ class TestQueryOperation(TestcaseBase):
         assert collection_w.num_entities == nb_old
 
         term_expr = f'{ct.default_int64_field_name} in [0, 1]'
-        check_vec = vectors[0].iloc[:, [0]][0:2].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:2].to_dict('records')
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
 
     @pytest.mark.tags(CaseLabel.L1)
@@ -1454,8 +1552,9 @@ class TestQueryOperation(TestcaseBase):
         method: create index and specify vec field as output field
         expected: return primary field and vec field
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_binary=True, is_index=False)[
-                                0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_binary=True, is_index=False
+        )[:2]
         fields = [ct.default_int64_field_name, ct.default_binary_vec_field_name]
         collection_w.create_index(ct.default_binary_vec_field_name, binary_index_params)
         assert collection_w.has_index()[0]
@@ -1586,7 +1685,9 @@ class TestQueryString(TestcaseBase):
         expected: query successfully
         """
 
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True
+        )[:2]
         res = vectors[0].iloc[:2, :3].to_dict('records')
         output_fields = [default_float_field_name, default_string_field_name]
         collection_w.query(default_string_term_expr, output_fields=output_fields,
@@ -1600,8 +1701,9 @@ class TestQueryString(TestcaseBase):
         method: specify string primary field as output field
         expected: return string primary field
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True,
-                                                             primary_field=ct.default_string_field_name)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, primary_field=ct.default_string_field_name
+        )[:2]
         res, _ = collection_w.query(expression, output_fields=[ct.default_string_field_name])
         assert res[0].keys() == {ct.default_string_field_name}
 
@@ -1613,8 +1715,9 @@ class TestQueryString(TestcaseBase):
                 query with mix expr in string field and int field
         expected: query successfully
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True,
-                                                             primary_field=ct.default_string_field_name)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, primary_field=ct.default_string_field_name
+        )[:2]
         res = vectors[0].iloc[:, 1:3].to_dict('records')
         output_fields = [default_float_field_name, default_string_field_name]
         collection_w.query(default_mix_expr, output_fields=output_fields,
@@ -1640,8 +1743,9 @@ class TestQueryString(TestcaseBase):
         method: query string expr with binary
         expected: verify query successfully
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_binary=True, is_index=False)[
-                                0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_binary=True, is_index=False
+        )[:2]
         collection_w.create_index(ct.default_binary_vec_field_name, binary_index_params)
         collection_w.load()
         assert collection_w.has_index()[0]
@@ -1655,8 +1759,9 @@ class TestQueryString(TestcaseBase):
         method: specify string is primary field, use prefix string expr
         expected: verify query successfully
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True,
-                                                             primary_field=ct.default_string_field_name)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, primary_field=ct.default_string_field_name
+        )[:2]
         res = vectors[0].iloc[:1, :3].to_dict('records')
         expression = 'varchar like "0%"'
         output_fields = [default_int_field_name, default_float_field_name, default_string_field_name]
@@ -1790,7 +1895,9 @@ class TestQueryString(TestcaseBase):
         expected: query successfully
         """
         # 1.  create a collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=False, is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=False, is_index=False
+        )[:2]
 
         nb = 3000
         df = cf.gen_default_list_data(nb)
@@ -1817,7 +1924,9 @@ class TestQueryString(TestcaseBase):
         method: create a collection and build diskann index 
         expected: verify query result
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_index=False
+        )[:2]
 
         collection_w.create_index(ct.default_float_vec_field_name, ct.default_diskann_index)
         assert collection_w.has_index()[0]
@@ -1826,7 +1935,7 @@ class TestQueryString(TestcaseBase):
 
         int_values = [0]
         term_expr = f'{ct.default_int64_field_name} in {int_values}'
-        check_vec = vectors[0].iloc[:, [0]][0:len(int_values)].to_dict('records')
+        check_vec = vectors[0].iloc[:, [0]][:len(int_values)].to_dict('records')
         collection_w.query(term_expr, check_task=CheckTasks.check_query_results, check_items={exp_res: check_vec})
 
     @pytest.mark.tags(CaseLabel.L2)
@@ -1836,9 +1945,12 @@ class TestQueryString(TestcaseBase):
         method: create a collection with string pk and build diskann index 
         expected: verify query result
         """
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True,
-                                                             primary_field=ct.default_string_field_name,
-                                                             is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix,
+            insert_data=True,
+            primary_field=ct.default_string_field_name,
+            is_index=False,
+        )[:2]
         collection_w.create_index(ct.default_float_vec_field_name, ct.default_diskann_index)
         assert collection_w.has_index()[0]
         collection_w.load()
@@ -1857,7 +1969,9 @@ class TestQueryString(TestcaseBase):
         expected: query successfully
         """
         # 1.  create a collection
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=False, is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=False, is_index=False
+        )[:2]
 
         nb = 3000
         df = cf.gen_default_list_data(nb)
@@ -1905,13 +2019,12 @@ class TestQueryCount(TestcaseBase):
         df = cf.gen_default_dataframe_data()
         collection_w.insert(df)
 
-        if consistency_level == CONSISTENCY_BOUNDED:
+        if (
+            consistency_level == CONSISTENCY_BOUNDED
+            or consistency_level != CONSISTENCY_STRONG
+            and consistency_level == CONSISTENCY_EVENTUALLY
+        ):
             time.sleep(ct.default_graceful_time)
-        elif consistency_level == CONSISTENCY_STRONG:
-            pass
-        elif consistency_level == CONSISTENCY_EVENTUALLY:
-            time.sleep(ct.default_graceful_time)
-
         collection_w.query(expr=default_expr, output_fields=[ct.default_count_output],
                            check_task=CheckTasks.check_query_results,
                            check_items={exp_res: [{count: ct.default_nb}]})
@@ -1975,10 +2088,15 @@ class TestQueryCount(TestcaseBase):
         expected: exception
         """
         collection_w = self.init_collection_wrap(name=cf.gen_unique_str(prefix))
-        collection_w.query(expr=default_term_expr, output_fields=[ct.default_count_output],
-                           check_task=CheckTasks.err_res,
-                           check_items={"err_code": 1,
-                                        "err_msg": f"has not been loaded to memory or load failed"})
+        collection_w.query(
+            expr=default_term_expr,
+            output_fields=[ct.default_count_output],
+            check_task=CheckTasks.err_res,
+            check_items={
+                "err_code": 1,
+                "err_msg": "has not been loaded to memory or load failed",
+            },
+        )
 
     @pytest.mark.tags(CaseLabel.L1)
     def test_count_duplicate_ids(self):
@@ -2035,7 +2153,9 @@ class TestQueryCount(TestcaseBase):
                                check_items={exp_res: [{count: half}]})
 
         # delete entities from _default
-        delete_expr = f"{ct.default_int64_field_name} in {[i for i in range(half, ct.default_nb)]} "
+        delete_expr = (
+            f"{ct.default_int64_field_name} in {list(range(half, ct.default_nb))} "
+        )
         collection_w.delete(expr=delete_expr)
         collection_w.query(expr=default_expr, output_fields=[ct.default_count_output],
                            partition_names=[ct.default_partition_name],
@@ -2172,7 +2292,9 @@ class TestQueryCount(TestcaseBase):
         insert_res, _ = collection_w.insert(df)
 
         # delete growing and sealed ids -> count
-        collection_w.delete(f"{ct.default_int64_field_name} in {[i for i in range(ct.default_nb)]}")
+        collection_w.delete(
+            f"{ct.default_int64_field_name} in {list(range(ct.default_nb))}"
+        )
         collection_w.query(expr=default_expr, output_fields=[ct.default_count_output],
                            check_task=CheckTasks.check_query_results,
                            check_items={exp_res: [{count: tmp_nb}]}
@@ -2234,7 +2356,9 @@ class TestQueryCount(TestcaseBase):
         insert_res, _ = collection_w.insert(df)
 
         # delete half entities, flush
-        half_expr = f'{ct.default_int64_field_name} in {[i for i in range(ct.default_nb // 2)]}'
+        half_expr = (
+            f'{ct.default_int64_field_name} in {list(range(ct.default_nb // 2))}'
+        )
         collection_w.delete(half_expr)
         assert collection_w.num_entities == ct.default_nb
 
@@ -2366,7 +2490,9 @@ class TestQueryCount(TestcaseBase):
                                  check_items={exp_res: [{count: ct.default_nb}]})
 
         # alias delete and count
-        collection_w_alias.delete(f"{ct.default_int64_field_name} in {[i for i in range(ct.default_nb)]}")
+        collection_w_alias.delete(
+            f"{ct.default_int64_field_name} in {list(range(ct.default_nb))}"
+        )
         collection_w_alias.query(expr=default_expr, output_fields=[ct.default_count_output],
                                  check_task=CheckTasks.check_query_results,
                                  check_items={exp_res: [{count: 0}]})

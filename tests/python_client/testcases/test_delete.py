@@ -43,7 +43,9 @@ class TestDeleteParams(TestcaseBase):
         expected: Query result is empty
         """
         # init collection with default_nb default data
-        collection_w, _, _, ids = self.init_collection_general(prefix, insert_data=True, is_binary=is_binary)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, insert_data=True, is_binary=is_binary
+        )[:4]
         expr = f'{ct.default_int64_field_name} in {ids[:half_nb]}'
 
         # delete half of data
@@ -148,7 +150,9 @@ class TestDeleteParams(TestcaseBase):
         expected: num entities unchanged and deleted data will not be queried
         """
         # init collection with default_nb default data
-        collection_w, _, _, ids = self.init_collection_general(prefix, insert_data=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, insert_data=True
+        )[:4]
         expr = f'{ct.default_int64_field_name} in {ids}'
         del_res, _ = collection_w.delete(expr)
 
@@ -176,8 +180,10 @@ class TestDeleteParams(TestcaseBase):
             f"{ct.default_string_field_name} in [ \"0\"]",
             f"{ct.default_float_vec_field_name} in [[0.1]]"
         ]
-        error = {ct.err_code: 1,
-                 ct.err_msg: f"invalid expression, we only support to delete by pk"}
+        error = {
+            ct.err_code: 1,
+            ct.err_msg: "invalid expression, we only support to delete by pk",
+        }
         for expr in exprs:
             collection_w.delete(expr, check_task=CheckTasks.err_res, check_items=error)
 
@@ -349,7 +355,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: assert index and deleted id not in search result
         """
         # create collection, insert tmp_nb, flush and load
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_index=False)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix, insert_data=True, is_index=False
+        )[:2]
 
         # create index
         index_params = {"index_type": "IVF_SQ8",
@@ -403,7 +411,7 @@ class TestDeleteOperation(TestcaseBase):
         # assert search results not contains deleted ids
         inter = set(insert_res.primary_keys[:ct.default_nb // 2]).intersection(set(search_res[0].ids))
         log.debug(inter)
-        assert len(inter) == 0
+        assert not inter
 
     @pytest.mark.tags(CaseLabel.L1)
     def test_delete_query_ids_both_sealed_and_channel(self):
@@ -448,7 +456,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: deleted entity is not in the search result
         """
         # init collection with nb default data
-        collection_w, _, _, ids = self.init_collection_general(prefix, insert_data=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, insert_data=True
+        )[:4]
         entity, _ = collection_w.query(tmp_expr, output_fields=["%"])
         search_res, _ = collection_w.search([entity[0][ct.default_float_vec_field_name]],
                                             ct.default_float_vec_field_name,
@@ -467,7 +477,7 @@ class TestDeleteOperation(TestcaseBase):
                     ).intersection(set(search_res_2[0].ids))
         # Using bounded staleness, we could still search the "deleted" entities,
         # since the search requests arrived query nodes earlier than query nodes consume the delete requests.
-        assert len(inter) == 0
+        assert not inter
 
     @pytest.mark.tags(CaseLabel.L2)
     def test_delete_search_rename_collection(self):
@@ -477,7 +487,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: deleted entity is not in the search result
         """
         # init collection with nb default data
-        collection_w, _, _, ids = self.init_collection_general(prefix, insert_data=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, insert_data=True
+        )[:4]
         entity, _ = collection_w.query(tmp_expr, output_fields=["%"])
         search_res, _ = collection_w.search([entity[0][ct.default_float_vec_field_name]],
                                             ct.default_float_vec_field_name,
@@ -486,7 +498,7 @@ class TestDeleteOperation(TestcaseBase):
         assert 0 in search_res[0].ids
         # rename collection
         old_collection_name = collection_w.name
-        new_collection_name = cf.gen_unique_str(prefix + "new")
+        new_collection_name = cf.gen_unique_str(f"{prefix}new")
         self.utility_wrap.rename_collection(old_collection_name, new_collection_name)
         collection_w = self.init_collection_wrap(name=new_collection_name)
         # delete entities
@@ -501,7 +513,7 @@ class TestDeleteOperation(TestcaseBase):
                     ).intersection(set(search_res_2[0].ids))
         # Using bounded staleness, we could still search the "deleted" entities,
         # since the search requests arrived query nodes earlier than query nodes consume the delete requests.
-        assert len(inter) == 0
+        assert not inter
 
     @pytest.mark.tags(CaseLabel.L1)
     def test_delete_expr_repeated_values(self):
@@ -636,7 +648,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: versify delete successfully
         """
         # init an auto_id collection and insert tmp_nb data
-        collection_w, _, _, ids = self.init_collection_general(prefix, nb=tmp_nb, insert_data=True, auto_id=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, nb=tmp_nb, insert_data=True, auto_id=True
+        )[:4]
 
         # delete with insert ids
         expr = f'{ct.default_int64_field_name} in {[ids[0]]}'
@@ -926,7 +940,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: No exception
         """
         # init an auto_id collection and insert tmp_nb data, flush and load
-        collection_w, _, _, ids = self.init_collection_general(prefix, nb=tmp_nb, insert_data=True, auto_id=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, nb=tmp_nb, insert_data=True, auto_id=True
+        )[:4]
 
         for del_id in ids:
             expr = f'{ct.default_int64_field_name} in {[del_id]}'
@@ -945,7 +961,9 @@ class TestDeleteOperation(TestcaseBase):
         expected: No exception
         """
         # init an auto_id collection and insert tmp_nb data
-        collection_w, _, _, ids = self.init_collection_general(prefix, nb=tmp_nb, insert_data=True, auto_id=True)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, nb=tmp_nb, insert_data=True, auto_id=True
+        )[:4]
 
         batch = 10
         for i in range(tmp_nb // batch):
@@ -1128,7 +1146,7 @@ class TestDeleteOperation(TestcaseBase):
             collection_w.insert(df)
 
         # delete even numbers
-        ids = [i for i in range(0, tmp_nb * multi, 2)]
+        ids = list(range(0, tmp_nb * multi, 2))
         expr = f'{ct.default_int64_field_name} in {ids}'
         collection_w.delete(expr)
 
@@ -1206,8 +1224,12 @@ class TestDeleteString(TestcaseBase):
         expected: assert index and deleted id not in search result
         """
         # create collection, insert tmp_nb, flush and load
-        collection_w, vectors = self.init_collection_general(prefix, insert_data=True, is_index=False,
-                                                             primary_field=ct.default_string_field_name)[0:2]
+        collection_w, vectors = self.init_collection_general(
+            prefix,
+            insert_data=True,
+            is_index=False,
+            primary_field=ct.default_string_field_name,
+        )[:2]
 
         # create index
         index_params_one = {"index_type": "IVF_SQ8",
@@ -1267,7 +1289,7 @@ class TestDeleteString(TestcaseBase):
         # assert search results not contains deleted ids
         inter = set(insert_res.primary_keys[:ct.default_nb // 2]).intersection(set(search_res[0].ids))
         log.debug(inter)
-        assert len(inter) == 0
+        assert not inter
 
     @pytest.mark.tags(CaseLabel.L1)
     def test_delete_query_ids_both_sealed_and_channel_with_string(self):
@@ -1314,8 +1336,9 @@ class TestDeleteString(TestcaseBase):
         expected: deleted entity is not in the search result
         """
         # init collection with nb default data
-        collection_w, _, _, ids = self.init_collection_general(prefix, insert_data=True,
-                                                               primary_field=ct.default_string_field_name)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix, insert_data=True, primary_field=ct.default_string_field_name
+        )[:4]
         entity, _ = collection_w.query(default_string_expr, output_fields=["%"])
         search_res, _ = collection_w.search([entity[0][ct.default_float_vec_field_name]],
                                             ct.default_float_vec_field_name,
@@ -1335,7 +1358,7 @@ class TestDeleteString(TestcaseBase):
                     ).intersection(set(search_res_2[0].ids))
         # Using bounded staleness, we could still search the "deleted" entities,
         # since the search requests arrived query nodes earlier than query nodes consume the delete requests.
-        assert len(inter) == 0
+        assert not inter
 
     @pytest.mark.tags(CaseLabel.L1)
     def test_delete_expr_repeated_values_with_string(self):
@@ -1557,8 +1580,12 @@ class TestDeleteString(TestcaseBase):
         expected: No exception
         """
         # init an auto_id collection and insert tmp_nb data, flush and load
-        collection_w, _, _, ids = self.init_collection_general(prefix, nb=tmp_nb, insert_data=True,
-                                                               primary_field=ct.default_string_field_name)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix,
+            nb=tmp_nb,
+            insert_data=True,
+            primary_field=ct.default_string_field_name,
+        )[:4]
 
         for del_id in ids:
             expr = f'{ct.default_string_field_name} in {[del_id]}'
@@ -1579,8 +1606,12 @@ class TestDeleteString(TestcaseBase):
         expected: No exception
         """
         # init an auto_id collection and insert tmp_nb data
-        collection_w, _, _, ids = self.init_collection_general(prefix, nb=tmp_nb, insert_data=True,
-                                                               primary_field=ct.default_string_field_name)[0:4]
+        collection_w, _, _, ids = self.init_collection_general(
+            prefix,
+            nb=tmp_nb,
+            insert_data=True,
+            primary_field=ct.default_string_field_name,
+        )[:4]
 
         batch = 10
         for i in range(tmp_nb // batch):
