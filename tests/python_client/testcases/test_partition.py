@@ -329,7 +329,7 @@ class TestPartitionParams(TestcaseBase):
         partition_w.insert(cf.gen_default_list_data(nb=100))
 
         # load with non-number replicas
-        error = {ct.err_code: 0, ct.err_msg: f"but expected one of: int, long"}
+        error = {ct.err_code: 0, ct.err_msg: "but expected one of: int, long"}
         collection_w.create_index(ct.default_float_vec_field_name, index_params=ct.default_flat_index)
         partition_w.load(replica_number=get_non_number_replicas, check_task=CheckTasks.err_res, check_items=error)
 
@@ -370,7 +370,7 @@ class TestPartitionParams(TestcaseBase):
         assert partition_w.num_entities == ct.default_nb
 
         # load with 2 replicas
-        error = {ct.err_code: 1, ct.err_msg: f"no enough nodes to create replicas"}
+        error = {ct.err_code: 1, ct.err_msg: "no enough nodes to create replicas"}
         collection_w.create_index(ct.default_float_vec_field_name, index_params=ct.default_flat_index)
         partition_w.load(replica_number=3, check_task=CheckTasks.err_res, check_items=error)
 
@@ -397,7 +397,10 @@ class TestPartitionParams(TestcaseBase):
         partition_w.load(replica_number=1)
         collection_w.query(expr=f"{ct.default_int64_field_name} in [0]", check_task=CheckTasks.check_query_results,
                            check_items={'exp_res': [{'int64': 0}]})
-        error = {ct.err_code: 5, ct.err_msg: f"Should release first then reload with the new number of replicas"}
+        error = {
+            ct.err_code: 5,
+            ct.err_msg: "Should release first then reload with the new number of replicas",
+        }
         partition_w.load(replica_number=2, check_task=CheckTasks.err_res, check_items=error)
 
         partition_w.release()
@@ -728,7 +731,7 @@ class TestPartitionOperations(TestcaseBase):
 
         # range for 5 times
         partition_name = cf.gen_unique_str(prefix)
-        for i in range(5):
+        for _ in range(5):
             # create partition and check that the partition exists
             partition_w = self.init_partition_wrap(collection_w, partition_name)
             assert collection_w.has_partition(partition_name)[0]

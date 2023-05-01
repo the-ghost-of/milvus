@@ -482,7 +482,7 @@ class TestCompactionOperation(TestcaseBase):
         collection_w.load()
         log.debug(self.utility_wrap.get_query_segment_info(collection_w.name))
 
-        delete_ids = [i for i in range(10)]
+        delete_ids = list(range(10))
         expr = f'{ct.default_int64_field_name} in {delete_ids}'
         collection_w.delete(expr)
 
@@ -508,7 +508,7 @@ class TestCompactionOperation(TestcaseBase):
         expected: Verify there are 2 merge type complation plans
         """
         collection_w = self.init_collection_wrap(cf.gen_unique_str(prefix))
-        for i in range(2):
+        for _ in range(2):
             df = cf.gen_default_dataframe_data(2 * tmp_nb)
             insert_res, _ = collection_w.insert(df)
             log.debug(collection_w.num_entities)
@@ -1344,7 +1344,7 @@ class TestCompactionOperation(TestcaseBase):
         replicas = collection_w.get_replicas()[0]
         replica_num = len(replicas.groups)
         seg_info = self.utility_wrap.get_query_segment_info(collection_w.name)[0]
-        if not (len(seg_info) == 1*replica_num or len(seg_info) == 2*replica_num):
+        if len(seg_info) not in [1 * replica_num, 2 * replica_num]:
             assert False
 
     @pytest.mark.tags(CaseLabel.L2)

@@ -103,10 +103,11 @@ class TestIndexParams(TestcaseBase):
         collection_w = self.init_collection_wrap(name=c_name)
         index_params = copy.deepcopy(default_index_params)
         index_params["index_type"] = index_type
-        if not isinstance(index_params["index_type"], str):
-            msg = "must be str"
-        else:
-            msg = "Invalid index_type"
+        msg = (
+            "Invalid index_type"
+            if isinstance(index_params["index_type"], str)
+            else "must be str"
+        )
         self.index_wrap.init_index(collection_w.collection, default_field_name, index_params,
                                    check_task=CheckTasks.err_res,
                                    check_items={ct.err_code: 1, ct.err_msg: msg})
@@ -210,7 +211,10 @@ class TestIndexOperation(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         self.index_wrap.init_index(collection_w.collection, default_field_name, default_index_params)
-        error = {ct.err_code: 1, ct.err_msg: f"CreateIndex failed: index already exists"}
+        error = {
+            ct.err_code: 1,
+            ct.err_msg: "CreateIndex failed: index already exists",
+        }
         self.index_wrap.init_index(collection_w.collection, default_field_name, default_index,
                                    check_task=CheckTasks.err_res, check_items=error)
 
@@ -505,7 +509,7 @@ class TestNewIndexBase(TestcaseBase):
         collection_w = self.init_collection_wrap(name=cf.gen_unique_str(), schema=schema)
 
         # use python random to generate the data as usual doesn't reproduce
-        data = [[i for i in range(nb)], np.random.random([nb, dim]).tolist()]
+        data = [list(range(nb)), np.random.random([nb, dim]).tolist()]
         collection_w.insert(data)
         log.debug(collection_w.num_entities)
 
@@ -943,7 +947,7 @@ class TestNewIndexBase(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(name=c_name)
         if get_simple_index["index_type"] != "FLAT":
-            for i in range(4):
+            for _ in range(4):
                 collection_w.create_index(ct.default_float_vec_field_name, get_simple_index,
                                           index_name=ct.default_index_name)
                 assert len(collection_w.indexes) == 1
@@ -1013,7 +1017,7 @@ class TestNewIndexBase(TestcaseBase):
         c_name = cf.gen_unique_str(prefix)
         collection_w = self.init_collection_wrap(c_name)
         if get_simple_index["index_type"] != "FLAT":
-            for i in range(4):
+            for _ in range(4):
                 collection_w.create_index(ct.default_float_vec_field_name, get_simple_index,
                                           index_name=ct.default_index_name)
                 assert len(collection_w.indexes) == 1
@@ -1295,7 +1299,7 @@ class TestNewIndexAsync(TestcaseBase):
         yield request.param
 
     def call_back(self):
-        assert True
+        pass
 
     """
        ******************************************************************
@@ -1592,7 +1596,7 @@ class TestIndexDiskann(TestcaseBase):
         yield request.param
 
     def call_back(self):
-        assert True
+        pass
 
     @pytest.mark.tags(CaseLabel.L2)
     def test_create_index_with_diskann_normal(self):

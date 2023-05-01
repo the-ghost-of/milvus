@@ -100,7 +100,7 @@ class TestChaos(TestChaosBase):
         if deploy_tool == "helm":
             release_name = self.instance_name
         else:
-            release_name = self.instance_name + "-minio"
+            release_name = f"{self.instance_name}-minio"
         minio_ip_pod_pair = get_pod_ip_name_pairs("chaos-testing", f"release={release_name}, app=minio")
         ms = MilvusSys()
         minio_ip = list(minio_ip_pod_pair.keys())[0]
@@ -132,16 +132,13 @@ class TestChaos(TestChaosBase):
         log.info("*********************Test Start**********************")
         log.info(connections.get_connection_addr('default'))
         log.info(f"file_type: {file_type}, create_index: {create_index}")
-        if create_index == "create_index":
-            create_index = True
-        else:
-            create_index = False
+        create_index = create_index == "create_index"
         self.init_health_checkers(create_index=create_index, dim=int(dim))
         if nb=="None":
             nb = 3000
             if file_type == "json":
                 nb = 13800
-            if file_type == "npy":
+            elif file_type == "npy":
                 nb = 65000
         else:
             nb = int(nb)
